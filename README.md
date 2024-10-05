@@ -14,6 +14,9 @@ In addition, please install bedtools (https://bedtools.readthedocs.io/en/latest/
 
 
 ### How to run
+
+In order to run this tool, you must provide a TSS list in bed file format. hg38's TSS list is included in this repository.
+
 To execute, run the following command
 ```
 bash cREscENDO_process_1.sh [path/to/working/directory] [path/to/10X_multiome_h5.file]
@@ -31,6 +34,7 @@ bash cREscENDO_process_2_single.sh [path/to/working/directory]
 bash cREscENDO_process_3_single.sh [path/to/working/directory]
 ```
 ### Output
+
 The single-cell level cRE activity is provided in a file named "Deeplift_full_ver2_all.npy"<br>
 This is a 3-dimensional matrix consisting of [genes, cells, peaks]<br>
 <br>
