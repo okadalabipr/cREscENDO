@@ -2,16 +2,12 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import torch
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import DataLoader
 from torch import nn
 import torch.nn.functional as F
 from torch import optim
 import os
-import cv2
 import datetime
-import pickle
-from tqdm import tqdm
-from scipy import stats
 from sync_batchnorm import convert_model, DataParallelWithCallback
 import sys
 
@@ -19,23 +15,15 @@ args = sys.argv
 samplename=str(args[1])
 chunkid=int(float(args[2]))
 
-#celllist=pd.read_csv(samplename+"/celllist_scVI_afterjoin.csv")
-#celllist=celllist.to_numpy()
-#celllist_lis=celllist[:,3]-1
-#usecell=celllist_lis.tolist()
-
 peaklist=pd.read_csv(samplename+"/peaks.bed",sep="\t",header=None)
 peaklist=peaklist[[1,2]].to_numpy()
 peaklist=torch.from_numpy(peaklist)
 peaklist=peaklist.to(torch.float32)
 
-#sig = nn.Sigmoid()
 ATACmatrix=np.load(samplename+"/ATAC_pred_fold"+str(chunkid)+".npy")
 ATACmatrix=ATACmatrix[:,:,0]
 ATACmatrix=torch.from_numpy(ATACmatrix)
 ATACmatrix=ATACmatrix.to(torch.float32)
-#ATACmatrix=ATACmatrix[:,usecell]
-#ATACmatrix=sig(ATACmatrix)
 ATACmatrix=nn.functional.normalize(ATACmatrix,p=2.0, dim=1, eps=1e-12, out=None)
 
 print(ATACmatrix.shape)
@@ -44,8 +32,6 @@ RNAmatrix=pd.read_csv(samplename+"/log1praw.csv",sep=",",header=None)
 RNAmatrix=RNAmatrix.to_numpy()
 RNAmatrix=torch.from_numpy(RNAmatrix)
 RNAmatrix=RNAmatrix.to(torch.float32)
-#RNAmatrix=RNAmatrix+1
-#RNAmatrix=torch.log(RNAmatrix)
 RNAmatrix_b=((RNAmatrix.transpose(0,1)-RNAmatrix.mean(dim=1))/RNAmatrix.std(dim=1)).transpose(0,1)
 
 RNAembed=pd.read_csv(samplename+"/pca_50dim_rnaembed_raw.txt",sep=" ",header=None)

@@ -1,6 +1,5 @@
 from Bio import SeqIO
 import numpy as np
-import pickle
 import sys
 
 args = sys.argv
@@ -37,9 +36,3 @@ for record in SeqIO.parse(samplename+"/peaks_extend.fasta", 'fasta'):
     cp=cp+1
 
 np.save(samplename+"/peak_extend_read.npy",df)
-
-#f = open('peak_read.obj', 'wb')
-#pickle.dump(read_lis, f)
-
-#f = open("peak_read.obj","rb")
-#read_lis = pickle.load(f)

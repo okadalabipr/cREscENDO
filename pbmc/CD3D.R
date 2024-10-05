@@ -9,12 +9,10 @@ library(SeuratData)
 library(SeuratDisk)
 library(ggplot2)
 
-count<-Read10X_h5("../../10x_ARC_pbmc_10k/pbmc_granulocyte_sorted_10k_filtered_feature_bc_matrix.h5", use.names = TRUE, unique.features = TRUE)
+count<-Read10X_h5("pbmc_granulocyte_sorted_10k_filtered_feature_bc_matrix.h5", use.names = TRUE, unique.features = TRUE)
 celllist<-read.csv("celllist_scVI.csv",header=F)
-
 count_s<-count$"Gene Expression"[,celllist$V1]
 
-#celllist_raw<-read.csv("celllist_scVI.csv",header=F)
 
 gexm <- CreateSeuratObject(counts = count_s, project = "pbmc10k",min.cells = 3)
 gexm <- NormalizeData(gexm)
@@ -28,32 +26,16 @@ DimPlot(gexm, reduction = "umap",group.by="seurat_clusters",label = T)
 
 
 g<-DimPlot(gexm, reduction = "umap",group.by="seurat_clusters")
-
 print(g)
-
-
 ggsave("pbmc_cluster.pdf",width = 8, height = 6)
 
 
 CD3D<-read.csv("CD3Dactivity.csv",sep="\t",header=F)
-
-
 gexm@meta.data$CD3D_promoter<-CD3D[,1]
 gexm@meta.data$CD3D_chr11_118334494_118335388<-CD3D[,27]
 gexm@meta.data$CD3D_chr11_118241249_118242001<-CD3D[,19]
 
-mean(CD3D[gexm@meta.data$seurat_clusters==2,2])
-mean(CD3D[gexm@meta.data$seurat_clusters==3,2])
 
-apply(CD3D[gexm@meta.data$seurat_clusters==2,],2,mean)-apply(CD3D[gexm@meta.data$seurat_clusters==3,],2,mean)
-
-FeaturePlot(gexm, features="CD3D")
-FeaturePlot(gexm, features="PRF1")
-FeaturePlot(gexm, features="S100A8")
-FeaturePlot(gexm, features="CD19")
-FeaturePlot(gexm, features="EBF1")
-FeaturePlot(gexm, features="CD1C")
-FeaturePlot(gexm, features="CD14")
 
 degma <- FindMarkers(gexm, ident.1 = 5, ident.2 = 0)
 

@@ -13,8 +13,6 @@ RNAmatrix=pd.read_csv(samplename+"/log1praw.csv",sep=",",header=None)
 RNAmatrix=RNAmatrix.to_numpy()
 RNAmatrix=torch.from_numpy(RNAmatrix)
 RNAmatrix=RNAmatrix.to(torch.float32)
-#RNAmatrix=RNAmatrix+1
-#RNAmatrix=torch.log(RNAmatrix)
 RNAmatrix_b=((RNAmatrix.transpose(0,1)-RNAmatrix.mean(dim=1))/RNAmatrix.std(dim=1)).transpose(0,1)
 RNAmatrix_np=RNAmatrix_b.transpose(0,1) ## Cell Gene
 

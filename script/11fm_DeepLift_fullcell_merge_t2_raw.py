@@ -5,7 +5,6 @@ import sys
 
 args = sys.argv
 samplename=str(args[1])
-#samplename="/users/ken.murakami/workspace/pbmcnew/try5"
 
 filelis=os.listdir(samplename)
 
@@ -33,7 +32,6 @@ import pandas as pd
 import os
 import sys
 
-#samplename="/users/ken.murakami/workspace/pbmcnew/try5"
 fname=samplename+"/"+"Deeplift_full_ver2_all.npy"
 allgrad=np.load(fname)
 

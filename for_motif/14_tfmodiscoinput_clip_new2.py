@@ -5,36 +5,34 @@ from torch.utils.data import DataLoader
 from torch import nn
 import os
 import datetime
+import random
+import math
+from path_explain import PathExplainerTorch
 import sys
 
 args = sys.argv
+looptime=0
+
 samplename=str(args[1])
-cellnum=int(float(args[2]))
-celltag=int(float(args[3]))
-chunkid=int(float(args[4]))
-foldid=int(float(args[5]))
+chunknum=1
+celltype=int(str(args[2]))
 
 
-
-
-from captum.attr import DeepLift
-
-
-
-ATACmatrix_norm=np.load(samplename+"/ATAC_pred_fold"+str(foldid)+".npy")
+ATACmatrix_norm=np.load(samplename+"/ATAC_pred_fold0.npy")
 ATACmatrix_norm=ATACmatrix_norm[:,:,0]
 ATACmatrix_norm=torch.from_numpy(ATACmatrix_norm)
 ATACmatrix_norm=ATACmatrix_norm.to(torch.float32)
+ATACmatrix_norm=(ATACmatrix_norm/ATACmatrix_norm.sum(axis=0))*(ATACmatrix_norm.sum(axis=0).mean())
 ATACmatrix_norm=nn.functional.normalize(ATACmatrix_norm,p=2.0, dim=1, eps=1e-12, out=None)
 
-RNAmatrix=pd.read_csv(samplename+"/log1praw.csv",sep=",",header=None)
+RNAmatrix=pd.read_csv(samplename+"/log1praw.csv",sep=",")
 RNAmatrix=RNAmatrix.to_numpy()
 RNAmatrix=torch.from_numpy(RNAmatrix)
 RNAmatrix=RNAmatrix.to(torch.float32)
 #RNAmatrix=torch.log(RNAmatrix)
 RNAmatrix_b=((RNAmatrix.transpose(0,1)-RNAmatrix.mean(dim=1))/RNAmatrix.std(dim=1)).transpose(0,1)
 
-predRNA=np.load(samplename+"/predrna_t2_raw_2_fold"+str(foldid)+".npy")
+predRNA=np.load(samplename+"/predrna_t2_raw_2_fold0.npy")
 predRNA=torch.from_numpy(predRNA)
 predRNA=predRNA.to(torch.float32)
 
@@ -48,47 +46,86 @@ RNAembed=RNAembed.to_numpy()
 RNAembed=torch.from_numpy(RNAembed)
 RNAembed=RNAembed.to(torch.float32)
 
-peakreadlist=np.load(samplename+"/peak_extend_read.npy",allow_pickle=True)
-peakreadlist=torch.from_numpy(peakreadlist)
-peakreadlist=peakreadlist.to(torch.float32) #peaks,length,4
-peakreadlist=peakreadlist.transpose(1,2) #peaks,4,length
-
 pairlist_prom=pd.read_csv(samplename+"/pair_promoter.csv",header=None)
 pairlist_prom=pairlist_prom[[1,2,3]].to_numpy()
 pairlist_prom=torch.from_numpy(pairlist_prom)
 pairlist_prom=pairlist_prom.to(torch.float32)
 
 pairlist=pd.read_csv(samplename+"/pair_300000.csv",header=None,names=("gene","start","end","pos"))
-pairlist_train=pd.read_csv(samplename+"/pair_300000_train_fold"+str(foldid)+".csv",header=None,names=("gene","start","end","pos"))
-pairlist_test=pd.read_csv(samplename+"/pair_300000_test_fold"+str(foldid)+".csv",header=None,names=("gene","start","end","pos"))
+pairlist_train=pd.read_csv(samplename+"/pair_300000_train_fold0.csv",header=None,names=("gene","start","end","pos"))
+pairlist_test=pd.read_csv(samplename+"/pair_300000_test_fold0.csv",header=None,names=("gene","start","end","pos"))
 
 traingenelist=pairlist["gene"].isin(pairlist_train["gene"]).values.tolist()
-testgenelist=pairlist["gene"].isin(pairlist_test["gene"]).values.tolist()
+testgenelist=pairlist["gene"].isin(pairlist["gene"]).values.tolist()
 
 pairlist=pairlist[["start","end","pos"]].to_numpy()
 pairlist=torch.from_numpy(pairlist)
 pairlist=pairlist.to(torch.float32)
 
-embedlist=pd.read_csv(samplename+"/embed_fold"+str(foldid)+".txt",sep=" ",header=None)
+peakreadlist=np.load(samplename+"/peak_extend_read.npy",allow_pickle=True)
+peakreadlist=torch.from_numpy(peakreadlist)
+peakreadlist=peakreadlist.to(torch.float32) #peaks,length,4
+peakreadlist=peakreadlist.transpose(1,2) #peaks,4,length
+
+embedlist=pd.read_csv(samplename+"/embed_fold0.txt",sep=" ",header=None)
 embedlist=embedlist.to_numpy()
 embedlist=torch.from_numpy(embedlist)
 embedlist=embedlist.to(torch.float32)
 
+cellclus=pd.read_csv(samplename+"/cellcluster_all.txt",header=None)
+cellclus=cellclus.to_numpy()
+cellclus=cellclus[:,0]
+cellclus=torch.from_numpy(cellclus)
+cellclus=cellclus-1
+cellclus=cellclus.long()
+
+print(cellclus.shape)
+
 traincellnum=np.load(samplename+"/traincellnum.npy")
+
+attr_list_full = []
+input_list_full = []
+
+dar=np.load(samplename+"/enha_clus_mtx_deeplift.npy") #Cls,B,L
+dar=dar[celltype]
+
+
+promenhatag=np.load(samplename+"/promenhatag.npy")
+genelist=pd.read_csv(samplename+"/pair_300000.csv",header=None)
+genelist=genelist[[0]].to_numpy()
+genelist=genelist[:,0]
+
+fname=samplename+"/clus"+str(celltype+1)+"gene.txt"
+tgtgene=pd.read_csv(fname,sep="\t",header=None)
+tgttag=np.isin(genelist,tgtgene)
+tgtmtx=np.ones(promenhatag.shape)
+tgtmtx=(tgtmtx.transpose(1,0)*(tgttag.astype(int))).transpose(1,0)
+
+enhaclus=(tgtmtx==1)&(dar==1)
+
+usecellmtx=np.load(samplename+"/enhausetagmtx.npy")
+
 
 fullcell=RNAembed.shape[0]
 traincell=traincellnum #10000 11830 11740
-testcell=cellnum #1893
-traingenenum=sum(traingenelist) #3599 #11881
-testgenenum=sum(testgenelist)
-fullgenenum=traingenenum+testgenenum
+testcell=fullcell #fullcell-traincell #1893
+#fullgenenum=traingenenum+testgenenum
+fullgenenum=pairlist.shape[0]
 traintag=0
-testtag=celltag
+testtag=0 #traincell
 
 peaknum=ATACmatrix_norm.shape[0]
+peaknum_train=round(peaknum*0.9)
+trainpeaktag=0
+testpeaktag=peaknum_train
+trainpeaknum=peaknum_train
+testpeaknum=peaknum-trainpeaknum
 
-batchsize=16
+batchsize=1
 
+trainpeaklist=list(range(trainpeaktag,trainpeaktag+trainpeaknum))
+testpeaklist=list(range(testpeaktag,testpeaktag+testpeaknum))
+fullpeaklist=list(range(peaknum))
 
 max_len=int((pairlist[:,1]-pairlist[:,0]).max()+1)
 PAD_IDX=0
@@ -125,8 +162,17 @@ opt_r_f=1e-4
 flipr=1
 revr=0.5
 
-traingenelist=torch.from_numpy(np.array(range(fullgenenum))[traingenelist])
-testgenelist=torch.from_numpy(np.array(range(fullgenenum))[testgenelist])
+traingenenum=1 #3599 #11881
+testgenenum=math.ceil(fullgenenum/chunknum)
+
+traingenelist=torch.from_numpy(np.array(range(traingenenum)))
+if looptime!=(chunknum-1):
+  testgenelist=torch.from_numpy(np.array(range(testgenenum*looptime,testgenenum*(looptime+1))))
+else:
+  testgenelist=torch.from_numpy(np.array(range(testgenenum*looptime,fullgenenum)))
+  testgenenum=len(testgenelist)
+
+cellclus_test=cellclus[testtag:testcell+testtag]
 
 
 
@@ -137,27 +183,22 @@ def dataprep(train=True):
   inputmtx=[]
   prommtx=[]
   atacmtx=[]
-  atacmtx_u=[]
   rnamtx=[]
   peakttmtx=[]
   posmtx=[]
-  minmtx=[]
   if train==True:
     inputmtx = [inputcal(traingenelist[j]) for j in range(traingenenum) ]
     prommtx = [promcal(traingenelist[j]) for j in range(traingenenum) ]
     atacmtx = [ataccal(traingenelist[j],traintag,traincell+traintag) for j in range(traingenenum) ]
     rnamtx= [rnacal(traingenelist[j],traintag,traincell+traintag) for j in range(traingenenum) ]
     posmtx = [poscal(traingenelist[j]) for j in range(traingenenum) ]
-    minmtx = [mincal(traingenelist[j]) for j in range(traingenenum)]
   else:
     inputmtx = [inputcal(testgenelist[j]) for j in range(testgenenum) ]
     prommtx = [promcal(testgenelist[j]) for j in range(testgenenum) ]
     atacmtx = [ataccal(testgenelist[j],testtag,testcell+testtag) for j in range(testgenenum) ]
     rnamtx= [rnacal(testgenelist[j],testtag,testcell+testtag) for j in range(testgenenum) ]
     posmtx = [poscal(testgenelist[j]) for j in range(testgenenum) ]
-    minmtx = [mincal(testgenelist[j]) for j in range(testgenenum)]
-  return inputmtx,prommtx,atacmtx,rnamtx,posmtx,minmtx
-
+  return inputmtx,prommtx,atacmtx,rnamtx,posmtx
 
 
 def inputcal(j):
@@ -175,12 +216,10 @@ def inputcal(j):
   return input
 
 
-
 def promcal(j):
   peakstart=int(pairlist_prom[j,0].item())
   embedvec=peakreadlist[peakstart,:,:]
   return embedvec
-
 
 
 def ataccal(j,cellstart,cellend):
@@ -206,7 +245,6 @@ def rnacal(j,cellstart,cellend):
   return rnavec
 
 
-
 def poscal(j):
   peakstart=int(pairlist[j,0].item())
   peakend=int(pairlist[j,1].item())
@@ -222,30 +260,13 @@ def poscal(j):
   return input
 
 
-def mincal(j):
-  rnatmp=predRNA[j]
-  min_idx=rnatmp.min(dim=0).indices #gene
-  atacvec_return = torch.zeros((max_len))
-  peakstart=int(pairlist[j,0].item())
-  peakend=int(pairlist[j,1].item())
-  peaknum_gene=peakend-peakstart+1
-  prompos=int(pairlist_prom[j,0].item())
-  enha=list(range(peakstart,(peakend+1)))
-  enha.remove(prompos)
-  atacvec=ATACmatrix_norm[enha,min_idx]
-  atacvec_return[0] = ATACmatrix_norm[prompos,min_idx]
-  atacvec_return[1:peaknum_gene]=atacvec
-  return atacvec_return
 
-
-traininput,trainprom,trainatac,trainrna,trainpos,trainminidx=dataprep(True)
-testinput,testprom,testatac,testrna,testpos,testminidx=dataprep(False)
-
+traininput,trainprom,trainatac,trainrna,trainpos=dataprep(True)
+testinput,testprom,testatac,testrna,testpos=dataprep(False)
 
 def peak_b_cal(j):
   input = peakreadlist[j,:,:]
   return input
-
 
 def atac_b_cal(j):
   atacvec = ATACmatrix_norm[j,:]
@@ -256,6 +277,8 @@ class CustomDataset(torch.utils.data.Dataset):
   def __init__(self,train=True):
     self.genes=[]
     self.trmd=[]
+    self.atac=[]
+    self.seqe=[]
     if train==True:
       self.genes=[traingenelist[j] for j in range(traingenenum)]
       self.trmd=[0 for j in range(traingenenum)]
@@ -271,26 +294,72 @@ class CustomDataset(torch.utils.data.Dataset):
       atacvec=trainatac[index]
       rnavec=trainrna[index]
       posvec=trainpos[index]
-      minidxvec=trainminidx[index]
     else:
       input_b=testinput[index]
       promvec=testprom[index]
       atacvec=testatac[index]
       rnavec=testrna[index]
       posvec=testpos[index]
-      minidxvec=testminidx[index]
     input=input_b.clone().detach()
     input[:,:,0:78]=0.25
     input[:,:,1422:1500]=0.25
     input=input[:,:,78:1422]
-    input_o=input.clone().detach()
-    input_o[input_o.sum(dim=(1,2))!=0,:,:]=0.25
-    #input_o=torch.full(input.shape, 0.25)
-    return input,input_o,promvec,atacvec,rnavec,posvec,minidxvec,self.genes[index]
+    input_o=torch.zeros((10,input.shape[0],input.shape[1],input.shape[2]))
+    shlist=list(range(1422-78))
+    for rs in range(10):
+      random.shuffle(shlist)
+      input_o[rs,:,:,:]=input[:,:,shlist].clone().detach()
+    return input,input_o,promvec,atacvec,rnavec,posvec,self.genes[index]
   def __len__(self):
     return len(self.genes)
 
 
+
+class CustomDataset_b(torch.utils.data.Dataset):
+  def __init__(self,train=True):
+    self.atac=[]
+    self.seqe=[]
+    if train==True:
+      self.atac=[atac_b_cal(j) for j in trainpeaklist ]
+      self.seqe=[peak_b_cal(j) for j in trainpeaklist ]
+      self.mode=[0 for j in trainpeaklist ]
+    else:
+      self.atac=[atac_b_cal(j) for j in testpeaklist ]
+      self.seqe=[peak_b_cal(j) for j in testpeaklist ]
+      self.mode=[1 for j in testpeaklist ]
+  def __getitem__(self,index):
+    input_b=self.seqe[index]
+    input=input_b
+    input[:,0:78]=0.25
+    input[:,1422:1500]=0.25
+    if self.mode[index]==0:
+      if torch.rand(1)<flipr:
+        idx=torch.randint(low=75, high=82, size=(1,))
+        input=input[:,idx:(idx+1344)]
+      else:
+        input=input[:,78:1422]
+    else:
+        input=input[:,78:1422]
+    if self.mode[index]==0:
+      if torch.rand(1)<revr:
+        input=torch.flip(input,dims=[1])
+        input_o=input.clone().detach()
+        input_o[0,:]=input[3,:]
+        input_o[1,:]=input[0,:]
+        input_o[2,:]=input[1,:]
+        input_o[3,:]=input[2,:]
+      else:
+        input_o=input.clone().detach()
+    else:
+        input_o=input.clone().detach()
+    atacvec=self.atac[index]
+    return input_o,input_o,atacvec
+  def __len__(self):
+    return len(self.atac)
+
+
+b_train_dataset=CustomDataset_b(train=True)
+b_test_dataset=CustomDataset_b(train=False)
 
 train_dataset=CustomDataset(train=True)
 test_dataset=CustomDataset(train=False)
@@ -306,7 +375,6 @@ train_batch = DataLoader(
     num_workers=2,
     pin_memory=True)  # コアの数
 
-
 test_batch = DataLoader(
     dataset=test_dataset,
     batch_size=batchsize,
@@ -314,9 +382,24 @@ test_batch = DataLoader(
     num_workers=2,
     pin_memory=True)
 
+b_train_batch = DataLoader(
+    dataset=b_train_dataset,
+    batch_size=128,
+    shuffle=True,
+    num_workers=2,
+    pin_memory=True)
+
+b_test_batch = DataLoader(
+    dataset=b_test_dataset,
+    batch_size=128,
+    shuffle=False,
+    num_workers=2,
+    pin_memory=True)
+
 # ニューラルネットワークの定義
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cpu")
 
 class PeakembedModel(nn.Module):
     def __init__(self):
@@ -413,7 +496,6 @@ class PeakembedModel(nn.Module):
 
 
 
-
 class TransformerModel(nn.Module):
     def __init__(self):
         super().__init__()
@@ -468,8 +550,9 @@ class RNAModel(nn.Module):
 
 
 
+
 class FullModel(nn.Module):
-    def __init__(self,pos, genet,data):
+    def __init__(self,pos, genet):
         super().__init__()
         self.seqembed= nn.Sequential(
             nn.GELU(),
@@ -515,6 +598,17 @@ class FullModel(nn.Module):
           nn.Linear(32, fullcell),
           nn.Sigmoid(),
           )
+        self.makeQ = nn.Linear(33, 33*edim)
+        self.makeK = nn.Linear(33, 33*edim)
+        self.layer_norm = nn.LayerNorm([max_len-1,edim])
+        self.softm = nn.Softmax(dim=3)
+        self.decoder = nn.Sequential(
+          nn.Linear(edim, 512),
+          nn.BatchNorm1d(512),
+          nn.ReLU(),
+          nn.Dropout(0.25),
+          nn.Linear(512, 1),
+          )
         self.prom_q = nn.Linear(32, 32*fdim)
         self.prom_sig = nn.Linear(32, 1)
         self.enha_q = nn.Linear(33, 32*fdim)
@@ -533,27 +627,16 @@ class FullModel(nn.Module):
           )
         self.pos=pos
         self.genet=genet
-        self.data=data
-        self.pos2=torch.vstack([pos,pos])
-        self.genet2=torch.hstack([genet,genet])
-        self.data2=torch.vstack([data,data])
-    def forward(self, atac):
+        #self.atac=atac
+    def forward(self, src):
         #src:B,L,4,bp prom:B,4,bp atac:B,C,L
-        atac=atac.view(-1,testcell,max_len)
         #prom, pos, genet
         mode=max_len
-        sbatch=self.data.shape[0]
-        if atac.shape[0]==self.data.shape[0]:
-            pos=self.pos
-            genet=self.genet
-            src=self.data
-        else:
-            pos=self.pos2
-            genet=self.genet2
-            src=self.data2
-        fbatchsize=atac.shape[0]
+        pos=self.pos
+        genet=self.genet
+        fbatchsize=src.shape[0]
         src=src.view(-1,mode,4,basenuminput) #pre:B,1,4,bp tr:B,L,4,bp
-        src_n=src.view(-1,4,basenuminput)
+        src_n=src.reshape(src.shape[0]*src.shape[1],4,basenuminput)
         src_ns=src_n[src_n.sum(dim=(1,2))!=0,:,:]
         embseq_in=self.seqembed(src_ns)
         embseq_in=embseq_in.view(-1,256*7)
@@ -564,10 +647,15 @@ class FullModel(nn.Module):
         embprom=embseq[:,0,:]
         mask=src.sum(dim=(2,3)) #B,L
         mask = (mask != PAD_IDX) #B,L
+        atacpredmtx=self.atacpred(embseq) #B,L,dim to B,L,C
+        atacpredmtx=atacpredmtx.transpose(1,2) #B,C,L
+        atacpredmtx=atacpredmtx.transpose(0,1) #C,B,L
+        atacpredmtx_o=torch.mul(atacpredmtx,mask).transpose(0,1) #B,C,L
         inputvec=torch.zeros((embseq.shape[0],embseq.shape[1],embseq.shape[2]+1))
         inputvec[:,:,0:32]=embseq
         inputvec[:,:,32]=pos
         inputvec=inputvec.to(device)
+        #def forward(self, src, prom, atac, mask):
         #src:B,L,D prom:B,D atac:B,C,L
         prom_qm=self.prom_q(embprom).view(-1,fdim,32)
         prom_qm=prom_qm.unsqueeze(2) #B,MH,L(1),D
@@ -580,7 +668,7 @@ class FullModel(nn.Module):
         QKs2=self.layer_norm2(QKs2)
         prom_qms=self.prom_sig(prom_qm) #B,MH,L(1),1
         prom_qms=prom_qms.squeeze(dim=3) #B,MH,1
-        atac_o=atac.transpose(1,2) #B,L,C
+        atac_o=atacpredmtx_o.transpose(1,2) #B,L,C
         atac_s2=atac_o[:,1:max_len,:]
         atac_p=atac_o[:,0,:] #B,C
         atac_p=atac_p.unsqueeze(1) #B,1,C
@@ -589,28 +677,33 @@ class FullModel(nn.Module):
         QKall2=torch.add(QKs2,QKp2) #B,MH,C
         QKall2=QKall2.transpose(1,2) #B,C,MH
         QKall2=self.encoder(QKall2)
+        #return QKall2
+        #def forward(self, src):
         output2_e = self.decoder2(QKall2)
+        #return output2_e
         output2_e=output2_e.view(-1,50)
         pred_o = torch.matmul(output2_e, Vs)
         pred_o=pred_o.view(-1,testcell,fullgenenum)
-        pred_o=pred_o[range(pred_o.shape[0]),:,genet]
-        return pred_o.flatten()
+        pred_o=pred_o[range(pred_o.shape[0]),:,genet] #B,C
+        pred_os=pred_o[:,cellclus_test==celltype]
+        usecellmtx_s=usecellmtx[:,cellclus_test==celltype]
+        pred_oss=pred_os*usecellmtx_s[genet,:]
+        pred_om=pred_oss.sum(axis=1)
+        pred_om=pred_om.unsqueeze(1)
+        return pred_om
 
+print(torch.cuda.memory_allocated())
 
 transformernet = TransformerModel()
 rnanet = RNAModel()
 peakembed = PeakembedModel()
 
-peakembed.load_state_dict(torch.load(samplename+"/DNA_embed_fold"+str(foldid)+".pth"))
-transformernet.load_state_dict(torch.load(samplename+"/transformer_rnapred_transformer_t2_raw_2_fold"+str(foldid)+".pth"))
-rnanet.load_state_dict(torch.load(samplename+"/transformer_rnapred_rna_t2_raw_2_fold"+str(foldid)+".pth"))
-
+peakembed.load_state_dict(torch.load(samplename+"/DNA_embed_fold0.pth"))
+transformernet.load_state_dict(torch.load(samplename+"/transformer_rnapred_transformer_t2_raw_2_fold0.pth"))
+rnanet.load_state_dict(torch.load(samplename+"/transformer_rnapred_rna_t2_raw_2_fold0.pth"))
 Vs=torch.load(samplename+"/pca_50dim_matrix_raw.pt").detach().clone().to(device)
 
-transformernet = transformernet.to(device)
-rnanet = rnanet.to(device)
-peakembed = peakembed.to(device)
-
+usecellmtx=torch.from_numpy(usecellmtx).detach().clone().to(device)
 
 # デバイスの確認
 print("Device: {}".format(device))
@@ -623,7 +716,6 @@ BCEL = torch.nn.BCELoss()
 BCEL_each = torch.nn.BCELoss(reduction="none")
 
 smx = nn.Softmax(dim=2)
-
 
 def losscal(pred_e,pred_u,rna):
   pred_e_f=pred_e.view(-1,2)
@@ -676,52 +768,89 @@ dt_now = datetime.datetime.now()
 print(dt_now)
 
 attr_list = []
-delta_list = []
 input_list = []
 
 
-tim=0
-for data, rdata, prom, atac, rna, pos, minlist, genet in test_batch:
-    # GPUにTensorを転送
-    data = data.to(device)
-    rdata = rdata.to(device)
-    prom = prom.to(device)
-    atac = atac.to(device)
-    rna = rna.to(device)
-    pos = pos.to(device)
-    minlist = minlist.to(device)
-    genet = genet.to(device)
-    atac_min=torch.ones(atac.shape).to(device) #B,C,L
-    atac_min=atac_min.transpose(0,1) #C,B,L
-    atac_min=torch.mul(atac_min,minlist).transpose(0,1)
-    atac=atac.view(-1,max_len)
-    baseline=atac_min.view(-1,max_len)
-    fullnet=FullModel(pos,genet,data)
-    fullnet.seqembed = peakembed.seqembed
-    fullnet.seqfc = peakembed.seqfc
-    fullnet.atacpred = peakembed.atacpred
-    fullnet.prom_q = transformernet.prom_q
-    fullnet.prom_sig = transformernet.prom_sig
-    fullnet.enha_q = transformernet.enha_q
-    fullnet.layer_norm2 = transformernet.layer_norm
-    fullnet.encoder = transformernet.encoder
-    fullnet.decoder2 = rnanet.decoder
-    fullnet.to(device)
-    fullnet.eval()
-    # データを入力して予測値を計算（順伝播）
-    dl = DeepLift(fullnet)
-    #attributions, delta = dl.attribute(data, rdata, return_convergence_delta=True)
-    attributions = dl.attribute(atac, baseline, return_convergence_delta=False)
-    #src:B,L,4,bp
-    attributions=attributions.view(-1,testcell,max_len)
-    attr_list.append(attributions.to("cpu").detach().clone())
-    del attributions
-    del fullnet
-    print(tim)
-    tim=tim+1
+niter=20
+tmpi=0
+
+for data, rdata, prom, atac, rna, pos, genet in test_batch:
+    print(tmpi)
+    tmpi=tmpi+1
+    tmpenha=(enhaclus[genet,:]).astype(int)
+    if (tmpenha==1).sum()>0:
+      tmp=atac.sum(dim=1)
+      niter=20
+      if ((tmp!=0).sum(dim=1)>50).sum()>0:
+        niter=10
+      # GPUにTensorを転送
+      data = data.to(device)
+      pos = pos.to(device)
+      genet = genet.to(device)
+      data=data.detach().requires_grad_(True)
+      transformernet = TransformerModel()
+      rnanet = RNAModel()
+      peakembed = PeakembedModel()
+      peakembed.load_state_dict(torch.load(samplename+"/DNA_embed_fold0.pth"))
+      transformernet.load_state_dict(torch.load(samplename+"/transformer_rnapred_transformer_t2_raw_2_fold0.pth"))
+      rnanet.load_state_dict(torch.load(samplename+"/transformer_rnapred_rna_t2_raw_2_fold0.pth"))
+      Vs=torch.load(samplename+"/pca_50dim_matrix_raw.pt").detach().clone().to(device)
+      transformernet = transformernet.to(device)
+      rnanet = rnanet.to(device)
+      peakembed = peakembed.to(device)
+      fullnet=FullModel(pos,genet)
+      fullnet.seqembed = peakembed.seqembed
+      fullnet.seqfc = peakembed.seqfc
+      fullnet.atacpred = peakembed.atacpred
+      fullnet.prom_q = transformernet.prom_q
+      fullnet.prom_sig = transformernet.prom_sig
+      fullnet.enha_q = transformernet.enha_q
+      fullnet.layer_norm2 = transformernet.layer_norm
+      fullnet.encoder = transformernet.encoder
+      fullnet.decoder2 = rnanet.decoder
+      del peakembed
+      del transformernet
+      del rnanet
+      fullnet.to(device)
+      fullnet.eval()
+      # データを入力して予測値を計算（順伝播）
+      #for rs in range(10):
+        #print(data.shape)
+        #print(rdata.shape)
+      rdata=torch.zeros((1,data.shape[1],data.shape[2],data.shape[3]))
+      explainer = PathExplainerTorch(fullnet)
+      interactions = explainer.attributions(input_tensor = data,
+                                      baseline=rdata,
+                                      num_samples=niter,
+                                      use_expectation=False)
+      if interactions.shape[0]==1:
+        tmpenha=tmpenha[np.newaxis,:]
+      interactions_out=interactions.to('cpu').detach().numpy().copy()
+      data_out=data.to('cpu').detach().numpy().copy()
+      interactions_out=interactions_out[tmpenha==1,:,:]
+      data_out=data_out[tmpenha==1,:,:]
+      attr_list.append(interactions_out)
+      input_list.append(data_out)
+      del data_out
+      del interactions_out
+      del tmpenha
+      del fullnet
+      del data
+      del atac
+      del interactions
+      del explainer
+      del rdata
+      del Vs
+      torch.cuda.empty_cache()
+      print(torch.cuda.memory_allocated())
 
 
-attr_m=torch.cat(attr_list, dim=0) #gene,cell
-outn = attr_m.numpy()
-fname=samplename+"/Deeplift_full_ver2_fold"+str(foldid)+"_"+str(chunkid)+".npy"
-np.save(fname,outn)
+
+inputm_full_s=np.concatenate(input_list, 0) #B,RS,L,4,1344
+fname = samplename+"/inputmtx"+str(celltype+1)+"_integratedGradient_norm_new2.npy"
+np.save(fname, inputm_full_s)
+
+
+featurem_full_s=np.concatenate(attr_list,0) 
+fname = samplename+"/deeplift"+str(celltype+1)+"_integratedGradient_norm_new2.npy"
+np.save(fname, featurem_full_s)

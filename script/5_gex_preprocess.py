@@ -1,14 +1,13 @@
 import scanpy as sc
 import numpy as np
 import pandas as pd
-import numpy as np
 import sys
 
 args = sys.argv
 samplename=str(args[1])
-##  "GSM6432683_P-1694_S-1694_"
+inputname=str(args[2])
 
-adata = sc.read_10x_h5(samplename+"/pbmc_granulocyte_sorted_10k_filtered_feature_bc_matrix.h5",gex_only=False)
+adata = sc.read_10x_h5(samplename+"/"+inputname,gex_only=False)
 gex=adata[:,adata.var.feature_types=="Gene Expression"]
 atac=adata[:,adata.var.feature_types=="Peaks"]
 thres = int(adata.shape[0]*0.05)
