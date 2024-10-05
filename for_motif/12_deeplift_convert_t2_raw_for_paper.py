@@ -2,14 +2,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import sys
-import math
-import subprocess
-
 
 
 args = sys.argv
 samplename=str(args[1])
-
 
 fname=samplename+"/Deeplift_full_ver2_all.npy"
 enhamtx=np.load(fname)
@@ -35,11 +31,9 @@ testcell=fullcell-traincell #1893
 
 cellnamelist=pd.read_csv(samplename+"/celllist_scVI.csv",header=None)
 cellnamelist=cellnamelist.to_numpy()
-#cellnamelist=cellnamelist[:,1]
 print(cellnamelist[0])
 
 ATACmatrix=np.load(samplename+"/ATAC_pred.npy")
-#ATACmatrix=ATACmatrix[:,:,0]
 
 ATAC_corr=np.zeros((enhamtx.shape[0],enhamtx.shape[2]))
 for j in range(ATAC_corr.shape[0]):

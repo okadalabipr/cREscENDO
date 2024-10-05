@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import torch
 import sys
@@ -23,5 +24,6 @@ for i in range(chanknum):
   cellnum=eachcell
   if i==chanknum-1:
     cellnum=fullcell-celltag
-  command = ["python","7_7DeepLift_full_ver2.py", samplename, str(cellnum), str(celltag), str(i), str(foldid)]
+  command = ["python","7_7DeepLift_full_ver2_single.py", samplename, str(cellnum), str(celltag), str(i), str(foldid)]
   subprocess.call(command)
+

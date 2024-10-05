@@ -1,19 +1,10 @@
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 import torch
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import DataLoader
 from torch import nn
-import torch.nn.functional as F
 from torch import optim
 import os
-import cv2
 import datetime
-import pickle
-from tqdm import tqdm
-from scipy import stats
-import copy
-import random
 import sys
 
 args = sys.argv
@@ -22,7 +13,6 @@ chunkid=int(float(args[2]))
 
 ATACmatrix=np.load(samplename+"/atac_count.npy")
 ATACmatrix[ATACmatrix>0]=1
-#ATACmatrix=ATACmatrix>0.2
 ATACmatrix=torch.from_numpy(ATACmatrix)
 ATACmatrix=ATACmatrix.to(torch.float32)
 print(ATACmatrix.shape)
