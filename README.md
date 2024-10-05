@@ -9,13 +9,13 @@ pip install -r requirements.txt
 ```
 
 to install the necessary files.
-In addition, please install bedtools (https://bedtools.readthedocs.io/en/latest/content/installation.html) , sync_batchnorm (https://github.com/vacancy/Synchronized-BatchNorm-PyTorch), please refer to their respective websites for installation.
+In addition, please install bedtools (https://bedtools.readthedocs.io/en/latest/content/installation.html) , sync_batchnorm (https://github.com/vacancy/Synchronized-BatchNorm-PyTorch), please refer to their respective websites for installation.<br>
 ("sync_batchnorm" should be placed inside the “script” directory.)
 
 
 ### How to run
 
-In order to run this tool, you must provide a TSS list in bed file format. hg38's TSS list is included in this repository.
+In order to run this tool, you must provide a TSS list in bed file format. hg38's TSS list is included in this repository.<br>
 (TSS list should be placed inside the “script” directory.)
 
 To execute, run the following command
