@@ -1,0 +1,10 @@
+scanpy
+numpy
+pandas
+BioPython
+torch
+captum
+matplotlib
+seaborn
+statannotations
+sklearn
