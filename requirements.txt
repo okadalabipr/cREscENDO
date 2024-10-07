@@ -7,4 +7,4 @@ captum
 matplotlib
 seaborn
 statannotations
-sklearn
+scikit-learn
