@@ -20,7 +20,7 @@ In order to run this tool, you must provide a TSS list in bed file format. hg38'
 
 To execute, run the following command
 ```
-bash cREscENDO_process_1.sh [path/to/working/directory] [path/to/10X_multiome_h5.file]
+bash cREscENDO_process_1.sh [path/to/working/directory] [path/to/10X_multiome_h5.file] [path/to/ref/genome/fasta]
 ```
 
 Perform the learning. As with other deep learning tools, cREscENDO should be trained using a GPU.<br>
