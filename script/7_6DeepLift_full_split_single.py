@@ -24,6 +24,6 @@ for i in range(chanknum):
   cellnum=eachcell
   if i==chanknum-1:
     cellnum=fullcell-celltag
-  command = ["python","7_7DeepLift_full_ver2_single.py", samplename, str(cellnum), str(celltag), str(i), str(foldid)]
+  command = ["python","script/7_7DeepLift_full_ver2_single.py", samplename, str(cellnum), str(celltag), str(i), str(foldid)]
   subprocess.call(command)
 
