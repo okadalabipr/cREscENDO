@@ -16,7 +16,7 @@ In addition, please install bedtools (https://bedtools.readthedocs.io/en/latest/
 ### How to run
 
 In order to run this tool, you must provide a TSS list in bed file format. hg38's TSS list is included in this repository.<br>
-(TSS list should be placed inside the “script” directory.)
+(TSS list should be placed inside the working directory.)
 
 To execute, run the following command
 ```
