@@ -8,7 +8,7 @@ args = sys.argv
 samplename=str(args[1])
 inputname=str(args[2])
 
-adata = sc.read_10x_h5(samplename+"/"+inputname,gex_only=False)
+adata = sc.read_10x_h5(inputname,gex_only=False)
 gex=adata[:,adata.var.feature_types=="Gene Expression"]
 atac=adata[:,adata.var.feature_types=="Peaks"]
 thres = int(adata.shape[0]*0.05)
