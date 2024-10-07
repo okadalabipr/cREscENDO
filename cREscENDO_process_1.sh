@@ -1,6 +1,8 @@
 samplename=$1
 inputname=$2
+dir=$(cd $(dirname $0); pwd)
 
+cd ${dir}
 python script/0_preparation.py ${samplename} ${inputname}
 python script/1_peak_extended.py ${samplename}
 bash script/2_fastafrombed_extend.sh ${samplename}
