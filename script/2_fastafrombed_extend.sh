@@ -1,3 +1,4 @@
 samplename=$1
+genomepath=$2
 
-fastaFromBed -fi /sqfs/work/K2313/u6b872/hg38/genome.fa -bed ${samplename}/peaks_extend.bed -fo ${samplename}/peaks_extend.fasta
+fastaFromBed -fi ${genomepath} -bed ${samplename}/peaks_extend.bed -fo ${samplename}/peaks_extend.fasta
