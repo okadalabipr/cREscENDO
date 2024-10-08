@@ -85,7 +85,7 @@ traincell=traincellnum #10000 11830 11740
 testcell=cellnum #1893
 traingenenum=sum(traingenelist) #3599 #11881
 testgenenum=sum(testgenelist)
-fullgenenum=traingenenum+testgenenum
+fullgenenum=testgenenum
 traintag=0
 testtag=celltag
 
