@@ -5,11 +5,12 @@ import sys
 
 args = sys.argv
 samplename=str(args[1])
+foldidx=int(str(args[2]))
 
 filelis=os.listdir(samplename)
 
 alllist=[]
-i=0
+i=foldidx
 print(i)
 tmplis=[]
 tagname="Deeplift_full_ver2_fold"+str(i)

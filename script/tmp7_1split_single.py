@@ -3,7 +3,7 @@ import subprocess
 
 args = sys.argv
 samplename=str(args[1])
-foldidx=int(str(args[1]))
+foldidx=int(str(args[2]))
 chanknum=10
 
 i=foldidx
