@@ -19,7 +19,6 @@ conda install bioconda::bedtools
 conda install bioconda::meme
 git clone https://github.com/vacancy/Synchronized-BatchNorm-PyTorch
 cp -r Synchronized-BatchNorm-PyTorch/sync_batchnorm cREscENDO/script/
-
 ```
 
 ### How to run
