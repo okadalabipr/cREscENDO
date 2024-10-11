@@ -39,8 +39,8 @@ bash cREscENDO_process_3.sh [path/to/working/directory]
 ```
 If cross-validation is not required, execute the following commands
 ```
-bash cREscENDO_process_2_single.sh [path/to/working/directory]
-bash cREscENDO_process_3_single.sh [path/to/working/directory]
+bash cREscENDO_process_2_single.sh [path/to/working/directory] 0
+bash cREscENDO_process_3_single.sh [path/to/working/directory] 0
 ```
 ### Output
 
