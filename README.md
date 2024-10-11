@@ -55,11 +55,11 @@ bash cREscENDO_process_2_single.sh [path/to/working/directory] 6
 bash cREscENDO_process_2_single.sh [path/to/working/directory] 7
 bash cREscENDO_process_2_single.sh [path/to/working/directory] 8
 bash cREscENDO_process_2_single.sh [path/to/working/directory] 9
-```
-Finally, run the following command to aggregate the results of cross-validation.
-```
+
+##Finally, run the following command to aggregate the results of cross-validation.
 bash cREscENDO_process_3.sh [path/to/working/directory]
 ```
+
 
 ### Output
 
