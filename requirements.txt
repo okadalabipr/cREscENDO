@@ -8,3 +8,4 @@ matplotlib
 seaborn
 statannotations
 scikit-learn
+path-explain
