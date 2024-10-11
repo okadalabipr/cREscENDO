@@ -5,6 +5,8 @@ cREscENDO is a deep learning-based computational tool for determining cRE region
 Installation should be performed in the following manner
 
 ```
+git clone https://github.com/okadalabipr/cREscENDO
+cd cREscENDO
 pip install -r requirements.txt
 ```
 
@@ -17,6 +19,7 @@ In addition, please install bedtools (https://bedtools.readthedocs.io/en/latest/
 ```
 conda install bioconda::bedtools
 conda install bioconda::meme
+cd ..
 git clone https://github.com/vacancy/Synchronized-BatchNorm-PyTorch
 cp -r Synchronized-BatchNorm-PyTorch/sync_batchnorm cREscENDO/script/
 ```
