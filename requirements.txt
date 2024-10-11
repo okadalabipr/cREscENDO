@@ -9,3 +9,5 @@ seaborn
 statannotations
 scikit-learn
 path-explain
+tensorflow
+modisco-lite
