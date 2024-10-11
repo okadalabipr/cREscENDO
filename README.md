@@ -14,7 +14,7 @@ pip install -r requirements.txt
 ```
 
 to install the necessary files.
-In addition, please install bedtools (https://bedtools.readthedocs.io/en/latest/content/installation.html) , Meme suite (https://meme-suite.org/meme/doc/install.html?man_type=web) , sync_batchnorm (https://github.com/vacancy/Synchronized-BatchNorm-PyTorch), please refer to their respective websites for installation.<br>
+In addition, please install bedtools (https://bedtools.readthedocs.io/en/latest/content/installation.html) , Meme suite (https://meme-suite.org/meme/doc/install.html?man_type=web) , ucsc-liftover (https://genome.ucsc.edu/cgi-bin/hgLiftOver) ,sync_batchnorm (https://github.com/vacancy/Synchronized-BatchNorm-PyTorch), please refer to their respective websites for installation.<br>
 ("sync_batchnorm" should be placed inside the “script” directory.)
 
 
@@ -22,6 +22,8 @@ In addition, please install bedtools (https://bedtools.readthedocs.io/en/latest/
 ```
 conda install bioconda::bedtools
 conda install bioconda::meme
+conda install -c bioconda -y ucsc-liftover
+
 cd ..
 git clone https://github.com/vacancy/Synchronized-BatchNorm-PyTorch
 cp -r Synchronized-BatchNorm-PyTorch/sync_batchnorm cREscENDO/script/
