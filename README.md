@@ -42,6 +42,25 @@ If cross-validation is not required, execute the following commands
 bash cREscENDO_process_2_single.sh [path/to/working/directory] 0
 bash cREscENDO_process_3_single.sh [path/to/working/directory] 0
 ```
+Cross-validation requires a lot of calculation time. If you want to divide the job or run the calculation in parallel due to restrictions on the execution environment, you can do it as follows.
+```
+##Please execute the following commands in separate jobs.
+bash cREscENDO_process_2_single.sh [path/to/working/directory] 0
+bash cREscENDO_process_2_single.sh [path/to/working/directory] 1
+bash cREscENDO_process_2_single.sh [path/to/working/directory] 2
+bash cREscENDO_process_2_single.sh [path/to/working/directory] 3
+bash cREscENDO_process_2_single.sh [path/to/working/directory] 4
+bash cREscENDO_process_2_single.sh [path/to/working/directory] 5
+bash cREscENDO_process_2_single.sh [path/to/working/directory] 6
+bash cREscENDO_process_2_single.sh [path/to/working/directory] 7
+bash cREscENDO_process_2_single.sh [path/to/working/directory] 8
+bash cREscENDO_process_2_single.sh [path/to/working/directory] 9
+```
+Finally, run the following command to aggregate the results of cross-validation.
+```
+bash cREscENDO_process_3.sh [path/to/working/directory]
+```
+
 ### Output
 
 The single-cell level cRE activity is provided in a file named "Deeplift_full_ver2_all.npy"<br>
