@@ -5,6 +5,9 @@ cREscENDO is a deep learning-based computational tool for determining cRE region
 Installation should be performed in the following manner
 
 ```
+## We recommend that you run it in a virtual environment. For example, use the following command.
+## conda create --name crescendo_env python=3.8
+## conda activate crescendo_env
 git clone https://github.com/okadalabipr/cREscENDO
 cd cREscENDO
 pip install -r requirements.txt
