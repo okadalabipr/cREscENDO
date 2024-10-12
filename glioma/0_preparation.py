@@ -6,8 +6,8 @@ import sys
 
 args = sys.argv
 samplename=str(args[1])
-inputname=str(args[2]) #"/sqfs/work/K2313/u6b872/nada_neuro/P-1694_S-1694"
-prefixname=str(args[3]) #"GSM6432683_P-1694_S-1694_"
+inputname=str(args[2])
+prefixname=str(args[3])
 
 adata = sc.read_10x_mtx(inputname,prefix=prefixname,gex_only=False)
 
