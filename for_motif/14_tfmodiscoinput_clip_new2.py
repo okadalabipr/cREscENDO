@@ -15,8 +15,10 @@ looptime=0
 
 samplename=str(args[1])
 chunknum=1
-celltype=int(str(args[2]))
-
+enhaclusfile=str(args[2])
+cellclusfile=str(args[3])
+celltype=int(str(args[4]))
+prefix=str(args[5])
 
 ATACmatrix_norm=np.load(samplename+"/ATAC_pred_fold0.npy")
 ATACmatrix_norm=ATACmatrix_norm[:,:,0]
@@ -72,11 +74,10 @@ embedlist=embedlist.to_numpy()
 embedlist=torch.from_numpy(embedlist)
 embedlist=embedlist.to(torch.float32)
 
-cellclus=pd.read_csv(samplename+"/cellcluster_all.txt",header=None)
+cellclus=pd.read_csv(cellclusfile,header=None)
 cellclus=cellclus.to_numpy()
 cellclus=cellclus[:,0]
 cellclus=torch.from_numpy(cellclus)
-cellclus=cellclus-1
 cellclus=cellclus.long()
 
 print(cellclus.shape)
@@ -86,23 +87,7 @@ traincellnum=np.load(samplename+"/traincellnum.npy")
 attr_list_full = []
 input_list_full = []
 
-dar=np.load(samplename+"/enha_clus_mtx_deeplift.npy") #Cls,B,L
-dar=dar[celltype]
-
-
-promenhatag=np.load(samplename+"/promenhatag.npy")
-genelist=pd.read_csv(samplename+"/pair_300000.csv",header=None)
-genelist=genelist[[0]].to_numpy()
-genelist=genelist[:,0]
-
-fname=samplename+"/clus"+str(celltype+1)+"gene.txt"
-tgtgene=pd.read_csv(fname,sep="\t",header=None)
-tgttag=np.isin(genelist,tgtgene)
-tgtmtx=np.ones(promenhatag.shape)
-tgtmtx=(tgtmtx.transpose(1,0)*(tgttag.astype(int))).transpose(1,0)
-
-enhaclus=(tgtmtx==1)&(dar==1)
-
+enhaclus=np.load(enhaclusfile)
 usecellmtx=np.load(samplename+"/enhausetagmtx.npy")
 
 
@@ -847,10 +832,9 @@ for data, rdata, prom, atac, rna, pos, genet in test_batch:
 
 
 inputm_full_s=np.concatenate(input_list, 0) #B,RS,L,4,1344
-fname = samplename+"/inputmtx"+str(celltype+1)+"_integratedGradient_norm_new2.npy"
+fname = samplename+"/"+prefix+"inputmtx.npy"
 np.save(fname, inputm_full_s)
 
-
 featurem_full_s=np.concatenate(attr_list,0) 
-fname = samplename+"/deeplift"+str(celltype+1)+"_integratedGradient_norm_new2.npy"
+fname = samplename+"/"+prefix+"contribution.npy"
 np.save(fname, featurem_full_s)
