@@ -1,5 +1,4 @@
-setwd("D:/scbasset_test/multiome_human_neuro/P-1694_S-1694/for_paper")
-#rm(list =ls())
+rm(list =ls())
 
 library(dplyr)
 library(Seurat)
@@ -37,10 +36,10 @@ gene1=all.markersrna[(all.markersrna$cluster==1) & (all.markersrna$p_val_adj<0.0
 gene2=all.markersrna[(all.markersrna$cluster==2) & (all.markersrna$p_val_adj<0.05) & (all.markersrna$avg_log2FC>0.3),]
 gene3=all.markersrna[(all.markersrna$cluster==3) & (all.markersrna$p_val_adj<0.05) & (all.markersrna$avg_log2FC>0.3),]
 
-write.table(gene0$gene,paste0(working_dir_path,"/cluster0_deg_glioma.txt"),sep="\t",quote=F,row.names=F,col.names=F)
-write.table(gene1$gene,paste0(working_dir_path,"/cluster1_deg_glioma.txt"),sep="\t",quote=F,row.names=F,col.names=F)
-write.table(gene2$gene,paste0(working_dir_path,"/cluster2_deg_glioma.txt"),sep="\t",quote=F,row.names=F,col.names=F)
-write.table(gene3$gene,paste0(working_dir_path,"/cluster3_deg_glioma.txt"),sep="\t",quote=F,row.names=F,col.names=F)
+write.table(gene0$gene,paste0(working_dir_path,"/cluster0gene.txt"),sep="\t",quote=F,row.names=F,col.names=F)
+write.table(gene1$gene,paste0(working_dir_path,"/cluster1gene.txt"),sep="\t",quote=F,row.names=F,col.names=F)
+write.table(gene2$gene,paste0(working_dir_path,"/cluster2gene.txt"),sep="\t",quote=F,row.names=F,col.names=F)
+write.table(gene3$gene,paste0(working_dir_path,"/cluster3gene.txt"),sep="\t",quote=F,row.names=F,col.names=F)
 
 
 gexmg <- CreateSeuratObject(counts = count_g, project = "pbmc10k")
