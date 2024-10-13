@@ -26,4 +26,6 @@ allgrad=np.concatenate(alllist,0)
 fname=samplename+"/"+"Deeplift_full_ver2_all.npy"
 np.save(fname,allgrad)
 
-
+allgrad_ssep_max=allgrad.max(axis=1)
+fname=samplename+"/"+"allgrad_ssep_max.npy"
+np.save(fname,allgrad_ssep_max)
