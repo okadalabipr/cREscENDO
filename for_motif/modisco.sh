@@ -1,3 +1,7 @@
-modisco motifs -a integratedGradient.npy -s inputseq.npy -n 50000 -o modiscoout.h5
-mkdir modiscoout_modiscoreport
-modisco report -i modiscoout.h5 -o modiscoout_modiscoreport -m JASPAR2024_CORE_vertebrates_non-redundant_pfms_meme.txt
+samplename=$1
+prefix=$2
+motiffile=$3
+
+modisco motifs -a ${samplename}/${prefix}contribution.npy -s ${samplename}/${prefix}inputmtx.npy -n 50000 -o ${samplename}/${prefix}modiscoout.h5
+mkdir ${samplename}/${prefix}_modiscoreport
+modisco report -i ${samplename}/${prefix}modiscoout.h5 -o ${samplename}/${prefix}_modiscoreport -m ${motiffile}
