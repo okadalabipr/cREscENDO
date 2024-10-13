@@ -14,14 +14,14 @@ args = sys.argv
 samplename=str(args[1])
 
 genelist=pd.read_csv(samplename+"/pair_300000.csv",sep=",",header=None)
+clus0gene=pd.read_csv(samplename+"/clus0gene.txt",sep="\t",header=None)
 clus1gene=pd.read_csv(samplename+"/clus1gene.txt",sep="\t",header=None)
 clus2gene=pd.read_csv(samplename+"/clus2gene.txt",sep="\t",header=None)
 clus3gene=pd.read_csv(samplename+"/clus3gene.txt",sep="\t",header=None)
 clus4gene=pd.read_csv(samplename+"/clus4gene.txt",sep="\t",header=None)
 clus5gene=pd.read_csv(samplename+"/clus5gene.txt",sep="\t",header=None)
-clus6gene=pd.read_csv(samplename+"/clus6gene.txt",sep="\t",header=None)
 
-genein=genelist[0].isin(clus1gene[0])+genelist[0].isin(clus2gene[0])+genelist[0].isin(clus3gene[0])+genelist[0].isin(clus4gene[0])+genelist[0].isin(clus5gene[0])+genelist[0].isin(clus6gene[0])
+genein=genelist[0].isin(clus0gene[0])+genelist[0].isin(clus1gene[0])+genelist[0].isin(clus2gene[0])+genelist[0].isin(clus3gene[0])+genelist[0].isin(clus4gene[0])+genelist[0].isin(clus5gene[0])
 
 pred=np.load(samplename+"/predrna_t2_raw_2_fold0.npy")
 
