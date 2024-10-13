@@ -91,7 +91,7 @@ for i in range(5):
 ##########
 
 grad_archr=np.zeros((pairlist.shape[0],max_len,5))
-for i in range(2,7):
+for i in range(1,6):
     fname=samplename+"/archr_for_paper/try"+str(i)+"/archr_matrix.npy"
     grad_tmp=np.load(fname)
     grad_archr[:,:,i-2]=grad_tmp
