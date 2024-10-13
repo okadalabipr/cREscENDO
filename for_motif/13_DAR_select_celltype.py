@@ -46,13 +46,15 @@ fcall=pd.DataFrame(enhaall.uns["rank_genes_groups"]["logfoldchanges"])
 enhaclusgenemtxall_allenha=np.zeros((DAEmtxall.shape[1],promenhatag.shape[0],promenhatag.shape[1]))
 
 for i in range(DAEmtxall.shape[1]):
+	tmp=np.zeros(enhamtxuse.shape[0])
 	enhaname=DAEmtxall.iloc[:,i]
-	usetag=enhaname[((pvalall.iloc[:,i]<0.05)&(fcall.iloc[:,i]>0))].to_numpy()
-	for j in range(usetag.shape[0]):
-		tmp2=usetag[j].split("_")
-		xtag=np.where(fullgenename == tmp2[0])[0][0]
-		ytag=int(tmp2[2])
-		enhaclusgenemtxall_allenha[i,xtag,ytag]=1
+	usetag=enhaname[((pvalall.iloc[:,i]<0.0001)&(fcall.iloc[:,i]>0.01))].to_numpy()
+	usetag=usetag.astype(int)
+	tmp[usetag]=1
+	enhaclusgenemtx=np.zeros(promenhatag.shape)
+	enhaclusgenemtx=enhaclusgenemtx
+	enhaclusgenemtx[(promenhatag==4)]=tmp
+	enhaclusgenemtxall_allenha[i]=enhaclusgenemtx
 
 
 np.save(samplename+"/enha_clus_mtx_deeplift.npy",enhaclusgenemtxall_allenha)
