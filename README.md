@@ -74,10 +74,18 @@ bash cREscENDO_process_3.sh [path/to/working/directory]
 The single-cell level cRE activity is provided in a file named "Deeplift_full_ver2_all.npy"<br>
 This is a 3-dimensional matrix consisting of [genes, cells, peaks]<br>
 <br>
-The cRE matrix for the top 60% of cREs, starting from the one with the highest activity maximum, is provided as the file named “allgrad_ssep_max.npy”.<br>
+The matrix showing the maximum activity values for each cRE candidate region is saved in “allgrad_ssep_max.npy”.<br>
 This matrix is a two-dimensional matrix of [genes,peaks]<br>
-"1" represents cRE, "0" represents non-cRE, and "-1" represents missing values in this matrix. <br>
-(The number of peaks validated for each gene is different, resulting in missing values.)<br>
+<br>
+The region with the top 60% activity of the matrix stored in “allgrad_ssep_max.npy” is defined as cRE.<br>
+Which region is used for downstream analysis as cRE is stored in “promenhatag.npy”.<br>
+This matrix is a two-dimensional matrix of [genes,peaks]<br>
+<br>
+This matrix is annotated by the correlation between the activity value and the ATAC-seq count and cRE activity.<br>
+Activity value is in the top 15% & the correlation between the ATAC-seq count and cRE activity is positive: 4<br>
+Activity value is in the top 60% (from 15% to 60%) & the correlation between the ATAC-seq count and cRE activity is positive: 2<br>
+Promoter of the target gene: 3<br>
+(For peaks with a negative correlation between ATAC-seq counts and cRE activity, we do not recommend using them for downstream analysis.)<br>
 <br>
 As for the peak dimension, the target promoter is always entered at index 0.<br>
 Then, starting from index 1, the regions with the smallest genome coordinates are stored in order.<br>
