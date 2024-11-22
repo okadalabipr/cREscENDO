@@ -31,6 +31,7 @@ import numpy as np
 import pandas as pd
 import os
 import sys
+import gc
 
 fname=samplename+"/"+"Deeplift_full_ver2_all.npy"
 allgrad=np.load(fname)
@@ -50,7 +51,8 @@ for i in range(10):
 
 pairlist_tgt=np.concatenate(pairlist_list,0)
 allgrad_s=allgrad[pd.DataFrame(pairlist_tgt).drop_duplicates().index,:,:]
-
+del allgrad
+gc.collect()
 
 allgrad_s_max=allgrad_s.max(axis=1)
 allgrad_s_max_pd=pd.DataFrame(allgrad_s_max.transpose(1,0),columns= pd.DataFrame(pairlist_tgt).drop_duplicates().to_numpy()[:,0])

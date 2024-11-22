@@ -64,7 +64,7 @@ embedlist=embedlist.to(torch.float32)
 traincellnum=np.load(samplename+"/traincellnum.npy")
 
 fullcell=RNAembed.shape[0]
-traincell=traincellnum #10000 11830 11740
+traincell=1 #10000 11830 11740
 testcell=RNAembed.shape[0] #1893
 traingenenum=sum(traingenelist) #3599 #11881
 testgenenum=sum(testgenelist)
